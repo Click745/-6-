@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Тапалка и магазин</title>
+<style>
+  body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #40E0D0; /* бирюзовый фон */
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  /* Верхняя навигация */
+  .tabs {
+    display: flex;
+    justify-content: space-around;
+    background-color: #fff;
+    padding: 10px 0;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+
+  .tab {
+    flex: 1;
+    text-align: center;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 12px 20px;
+    margin: 0 5px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #74ebd5, #ACB6E5);
+    color: #fff;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 -3px 6px rgba(0,0,0,0.2);
+}
+
+  .tab:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+  /* Контент вкладок */
+.content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+}
+
+/* Главный экран */
+#main-screen {
+    display:flex; 
+    flex-direction:column; 
+    align-items:center; 
+    justify-content:center; 
+}
+
+/* Баланс */
+#balance-display {
+    font-size:24px; 
+    margin-bottom:20px; 
+    font-weight:bold; 
+}
+
+/* Картинка-тапалка */
+#clicker-img {
+    width:150px; 
+    height:auto; 
+    cursor:pointer; 
+    margin-bottom:20px;
+
+      /* Эффекты при наведении */
+      transition: transform 0.2s, box-shadow 0.2s, filter 0.2s; 
+}
+#clicker-img:hover {
+   transform: scale(1.05);
+   box-shadow: 0px 4px 12px rgba(0,0,0,0.3);
+   filter:saturate(1.2);
+}
+
+/* Вкладка магазин */
+#shop {
+ display:none; 
+}
+#shop-item {
+ display:flex; 
+ flex-direction:column; 
+ align-items:center; 
+ margin-top:20px; 
+ padding:15px;
+ background-color:#fff;
+ border-radius:15px;
+ box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+ width:auto;
+ max-width:350px;
+}
+#shop h2 {
+ margin-bottom:15px;
+ color:#333;
+}
+#buy-upgrade {
+ margin-top:10px; 
+ padding:12px 24px; 
+ font-size:16px; 
+ background-color:#4CAF50; /* зеленый */
+ border:none; 
+ border-radius:px8 ;/* исправлено на правильное значение */
+ cursor:pointer; 
+ transition:.3s all ease-in-out;
+/* Тень для кнопки */
+ box-shadow:
+   inset 0 -3px #388E3C,
+   inset 0 -6px #2E7D32,
+   inset -1px -1px #66BB6A,
+   inset -2px -2px #66BB6A,
+   inset -3px -3px #66BB6A,
+   inset -4px -4px #66BB6A,
+   inset -5px -5px #66BB6A,
+   inset -6px -6px #66BB6A,
+   inset -7px -7p
+}
+#buy-upgrade:hover {
+ background-color:#45a049; /* чуть темнее при наведении */
+ box-shadow:
+   inset 0 -3p
+}
+</style>
+</head>
+<body>
+
+<!-- Навигация -->
+<div class="tabs">
+ <div class="tab" id="tab-main">Главная</div>
+ <div class="tab" id="tab-shop">Магазин</div>
+ <div class="tab" id="tab-tasks">Задания</div>
+</div>
+
+<!-- Контент -->
+<div class="content">
+
+<!-- Главный экран -->
+<div id="main-screen">
+ <div id="balance-display">Баланс DEX : <span id="balance">0</span></div>
+ <!-- Тут вставьте свою картинку-тапалку -->
+ <img src="img/1.jpg" id="clicker-img" alt="Кликер"/>
+</div>
+
+<!-- Магазин -->
+<div id="shop">
+ <h2>Магазин улучшений</h2>
+ <div id="shop-item">
+   <p>Улучшение +<span id="click-increment">1</span> клик за <span id="upgrade-cost">100</span> DEX</p>
+   <button id="buy-upgrade">Купить улучшение</button>
+ </div>
+</div>
+
+<!-- Задания -->
+<div id="tasks">
+ <h2>Задания</h2>
+ <div class="task">
+   <h3>Подписаться на наш Telegram-канал</h3>
+   <!-- Вставьте свою ссылку сюда -->
+   <a href="https://t.me/cryptoinfosikiёё" target="_blank" id="telegram-link">Перейти к каналу</a>
+   <br/>
+   <button class="subscribed-btn" id="subscribe-btn">Я подписался</button>
+   <div class="message" id="subscribe-message"></div>
+ </div>
+</div>
+
+</div>
+
+<script>
+// Инициализация данных
+let balance = parseInt(localStorage.getItem('balance')) || 0;
+
+// Уровень улучшения +1 клик за раз
+let upgradeCount = parseInt(localStorage.getItem('upgradeCount')) || 0;
+
+// Стоимость следующего улучшения
+let upgradeCost = parseInt(localStorage.getItem('upgradeCost')) ||100;
+
+// Количество добавляемых клик за одно улучшение
+let clickIncrement = (parseInt(localStorage.getItem('clickIncrement')) ||1) + upgradeCount;
+
+// Статус выполнения задания
+let taskCompleted = localStorage.getItem('taskCompleted') === 'true' ? true : false;
+
+// Укажите здесь ссылку на ваш Telegram канал
+const telegramLink = "https://t.me/cryptoinfosiki"; // <-- замените на свою ссылку
+
+// Обновление отображения баланса
+function updateBalance() {
+ document.getElementById('balance').textContent = balance.toString();
+ localStorage.setItem('balance', balance);
+}
+
+// Обновление стоимости улучшения
+function updateUpgradeCost() {
+ document.getElementById('upgrade-cost').textContent = upgradeCost.toString();
+}
+
+// Обновление отображения уровня улучшений и клик-инкремента
+function updateUpgradeDisplay() {
+ document.getElementById('click-increment').textContent = (parseInt(localStorage.getItem('clickIncrement')) ||1) + upgradeCount ;
+}
+
+// Переключение вкладок
+const tabMain = document.getElementById('tab-main');
+const tabShop = document.getElementById('tab-shop');
+const tabTasks = document.getElementById('tab-tasks');
+
+const mainScreen = document.getElementById('main-screen');
+const shopScreen = document.getElementById('shop');
+const tasksScreen = document.getElementById('tasks');
+
+tabMain.onclick= () => { showTab('main'); }
+tabShop.onclick= () => { showTab('shop'); }
+tabTasks.onclick= () => { showTab('tasks'); }
+
+function showTab(tab) {
+ mainScreen.style.display='none';
+ shopScreen.style.display='none';
+ tasksScreen.style.display='none';
+
+ if (tab==='main') mainScreen.style.display='flex';
+ if (tab==='shop') shopScreen.style.display='block';
+ if (tab==='tasks') tasksScreen.style.display='block';
+}
+
+// Обработка клика по изображению
+const clickerImg = document.getElementById('clicker-img');
+clickerImg.onclick= () => {
+ balance += (parseInt(localStorage.getItem('clickIncrement')) ||1) + upgradeCount ;
+ updateBalance();
+}
+
+// Обработка покупки улучшения
+document.getElementById('buy-upgrade').onclick= () => {
+ if (balance >= upgradeCost) {
+   balance -= upgradeCost;
+
+   // Увеличиваем уровень улучшений
+   upgradeCount +=1;
+
+   // Обновляем стоимость следующего улучшения
+   upgradeCost *=2;
+
+   // Сохраняем данные в localStorage
+   localStorage.setItem('upgradeCount', upgradeCount);
+   localStorage.setItem('upgradeCost', upgradeCost);
+   
+   // Обновляем отображение
+   updateBalance();
+   updateUpgradeCost();
+   updateUpgradeDisplay();
+ } else {
+ alert("Недостаточно DEX");
+ }
+}
+
+// Изначально обновляем отображение баланса и стоимости улучшений
+updateBalance();
+updateUpgradeCost();
+updateUpgradeDisplay();
+
+// Задание подписки
+const subscribeBtn= document.getElementById('subscribe-btn');
+const messageDiv= document.getElementById('subscribe-message');
+
+if (localStorage.getItem('taskCompleted') === 'true') {
+ taskCompleted=true ;
+ // Отключаем кнопку и показываем сообщение
+ document.getElementById('subscribe-btn').disabled=true ;
+ document.getElementById('subscribe-message').textContent='Задача выполнена!';
+} else {
+ taskCompleted=false ;
+}
+
+document.getElementById('telegram-link').href= telegramLink;
+
+// Проверка подписки (здесь нужно реализовать проверку через API или вручную)
+document.getElementById('subscribe-btn').onclick= () => {
+
+ if (taskCompleted) {
+ alert("Вы уже подтвердили выполнение задания");
+ return ;
+ }
+
+// После подтверждения задачи:
+taskCompleted=true ;
+// Сохраняем статус выполнения задачи
+localStorage.setItem('taskCompleted','true');
+// Засчитываем награду только если пользователь перешел по ссылке до нажатия кнопки
+balance +=3000 ;
+updateBalance();
+// Отключаем кнопку и показываем сообщение
+document.getElementById('subscribe-btn').disabled=true ;
+document.getElementById('subscribe-message').textContent='Задача выполнена!';
+}
+
+</script>
+
+</body>
+</html>
